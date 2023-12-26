@@ -8,8 +8,8 @@ from hyper_parameters import *
 from regression import Regression
 
 
-def linear_regression():
-    loss_function = torch.nn.MSELoss()
+def logistic_regression():
+    loss_function = torch.nn.CrossEntropyLoss()
 
     train_accuracy = []
     test_accuracy = []
@@ -17,7 +17,6 @@ def linear_regression():
     model = Regression()
     model.to(device)
     # Define the optimizer
-
     optimizer = optim.SGD(model.parameters(),
                           lr=lr,
                           momentum=momentum,
@@ -36,8 +35,7 @@ def linear_regression():
 
             # forward pass
             logits = model(images)
-            target = F.one_hot(labels, 10).float()
-            loss = loss_function(logits, target)
+            loss = loss_function(logits, labels)
 
             # backpropagation
             optimizer.zero_grad()

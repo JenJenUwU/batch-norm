@@ -1,28 +1,52 @@
 import torch
+import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
 
 from data import train_loader, test_loader
 from hyper_parameters import *
-from regression import Regression
 
 
-def linear_regression():
-    loss_function = torch.nn.MSELoss()
+class LeNet(nn.Module):
+    def __init__(self):
+        super(LeNet, self).__init__()
+        # Define the model parameters using Pytorch modules here
+        # For MNIST
+        # self.fc1 = torch.nn.Linear(28*28, 300)
+        # FOR CIFAR10
+        self.fc1 = torch.nn.Linear(28 * 28, 300)
+        self.fc2 = torch.nn.Linear(300, 100)
+        self.fc3 = torch.nn.Linear(100, 10)
+
+    def forward(self, x):
+        # For MNIST
+        # x = x.view(-1,28*28) # Reshaping the data so that it becomes a vector
+        x = x.view(-1, 28 * 28)
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
+        x = F.relu(x)
+        x = self.fc3(x)
+        # Fill in the rest here
+
+        return x
+
+
+def lenet_300_100_10():
+    loss_function = torch.nn.CrossEntropyLoss()
 
     train_accuracy = []
     test_accuracy = []
 
-    model = Regression()
+    model = LeNet()
     model.to(device)
-    # Define the optimizer
 
+    # Define the optimizer
     optimizer = optim.SGD(model.parameters(),
                           lr=lr,
                           momentum=momentum,
                           weight_decay=weight_decay)
-
     # iterate over epochs
     for epoch in range(1, epochs + 1):
         # train phase
@@ -36,8 +60,7 @@ def linear_regression():
 
             # forward pass
             logits = model(images)
-            target = F.one_hot(labels, 10).float()
-            loss = loss_function(logits, target)
+            loss = loss_function(logits, labels)
 
             # backpropagation
             optimizer.zero_grad()
